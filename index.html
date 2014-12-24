@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="./nnvis.css">
+<style>
+
+
+</style>
+<body>
+
+  <h2 class="text-center"> Design Ideas </h2>
+  <div class="chart_container">
+  </div>
+
+  <div class="note_chart"> </div>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="./nnvis.js"></script>
+<script>
+  $(".chart_container").nnbarchart({
+    type: "DesignIdea"
+  });
+  // $(".note_chart").nnbarchart({
+  //   type: "FieldNote"
+  // });
+</script>
