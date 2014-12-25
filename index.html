@@ -7,21 +7,54 @@
 
 </style>
 <body>
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">NatureNet Data</a>
+      </div>
 
-  <h2 class="text-center"> Design Ideas </h2>
-  <div class="chart_container">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#designIdea_chart">Design Idea<span class="sr-only">(current)</span></a></li>
+          <li><a href="#observation_chart">Observations</a></li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
+
+  <div class="container">
+    <!-- <h2 class="text-center"> Design Ideas </h2> -->
+    <div id="designIdea_chart"></div>
+    <div id="observation_chart"></div>
+
+    <!-- <div id="note_chart"> </div> -->
   </div>
 
-  <div class="note_chart"> </div>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="./nnvis.js"></script>
 <script>
-  $(".chart_container").nnbarchart({
-    type: "DesignIdea"
+  var $this = $(this);
+  // get the data first
+  var datapaser = $this.dataParser({
+    url: "http://naturenet-dev.herokuapp.com/api/notes",
+    type:  "DesignIdea"
   });
-  // $(".note_chart").nnbarchart({
-  //   type: "FieldNote"
-  // });
+
+  datapaser.on("dataReady", function() {
+    var data = this.getData();
+    $("#designIdea_chart").nnbarchart({
+      data: data,
+      type: "DesignIdea"
+    });
+  });
 </script>

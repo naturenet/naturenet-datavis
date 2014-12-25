@@ -28,3 +28,12 @@
 .x.axis path {
   display: none;
 }
+
+/* line chart */
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+
