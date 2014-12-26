@@ -27,9 +27,24 @@
 	       	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 	       	var createHeader = function() {
 	       		$header = $(document.createElement("h2")).addClass("text-center");
-	       		// if (typeOption.type == "")
-	       		$header.html("Design Ideas");
+	       		if (typeOption.type == "DesignIdea") {
+	       			$header.html("Design Ideas");
+	       		} else if (typeOption.type == "FieldNote") {
+	       			$header.html("Observations");
+	       		}
+
 	       		$header.appendTo($chartContainer);
+	       	};
+
+	       	// create loading overlay
+	       	var createLoading = function() {
+                var $loadingDiv = $(document.createElement("div")).addClass("loading");
+                var $loadingIcon = $(document.createElement("div")).addClass("loading_icon");
+                var $loadingSpan = $(document.createElement("span")).addClass("glyphicon glyphicon-refresh");
+                $loadingIcon.append($loadingSpan);
+                var $loadingP = $(document.createElement("p")).text("loading");
+                $loadingIcon.append($loadingP);
+                $loadingDiv.append($chartContainer);
 	       	};
 
 	        var createSelectDiv = function() {
@@ -82,11 +97,12 @@
 
 	        var setSVG = function() {
 	        	svg = d3.select(".chart").append("svg")
-			    .attr("width", width + margin.left + margin.right)
-			    .attr("height", height + margin.top + margin.bottom)
-			  .append("g")
-			    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+			    		.attr("width", width + margin.left + margin.right)
+			    		.attr("height", height + margin.top + margin.bottom)
+			  			.append("g")
+			    		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	        };
+
 
 	        // everything starts from here
 	        var setupVis = function() {
@@ -124,33 +140,49 @@
 	        };
 
 			// generates the svg for the bar chart
-			var renderSVG = function(data) {		
+			var renderSVG = function(data) {	
+				var tip = d3.tip()
+				  		.attr('class', 'd3-tip')
+				  		.offset([-10, 0])
+				  		.html(function(d) {
+				    		return "<strong>Frequency:</strong> <span style='color:red'>" + d.frequency + "</span>";
+				  		});	
+				svg.call(tip);
+					
 			  	x.domain(data.map(function(d) { return d.date; }));
 			  	y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
 
 			  	svg.append("g")	
-			      .attr("class", "x axis")
-			      .attr("transform", "translate(0," + height + ")")
-			      .call(xAxis);
+			      	.attr("class", "x axis")
+			      	.attr("transform", "translate(0," + height + ")")
+			      	.call(xAxis);
 
 			  	svg.append("g")
-			      .attr("class", "y axis")
-			      .call(yAxis)
-			    .append("text")
-			      .attr("transform", "rotate(-90)")
-			      .attr("y", 6)
-			      .attr("dy", ".71em")
-			      .style("text-anchor", "end")
-			      .text("Frequency");
+			      	.attr("class", "y axis")
+			      	.call(yAxis)
+			    	.append("text")
+			      	.attr("transform", "rotate(-90)")
+			      	.attr("y", 6)
+			      	.attr("dy", ".71em")
+			      	.style("text-anchor", "end")
+			      	.text("Frequency");
 
 			  	svg.selectAll(".bar")
-			      .data(data)
-			      .enter().append("rect")
-			      .attr("class", "bar")
-			      .attr("x", function(d) { return x(d.date); })
-			      .attr("width", x.rangeBand())
-			      .attr("y", function(d) { return y(d.frequency); })
-			      .attr("height", function(d) { return height - y(d.frequency); });
+			      	.data(data)
+			      	.enter().append("rect")
+			      	.attr("class", "bar")
+			      	.attr("data-toggle", "tooltip")
+			      	.attr("x", function(d) { return x(d.date); })
+			      	.attr("width", x.rangeBand())
+			      	.transition()
+			      	.delay(function (d, i) { 
+			      		if (d.frequency == 0) return 0 
+			      		else return i*50  })
+			      	// .duration(50)
+			      	.attr("y", function(d) { return y(d.frequency); })
+			      	.attr("height", function(d) { return height - y(d.frequency); })
+			      	.on("mouseover", tip.show)
+			      	.on("mouseout", tip.hide);
 			};
 
 			// filter data by month (yyyy/mm)
@@ -167,11 +199,13 @@
 					var monthNameFormat = d3.time.format("%m"); // get month mm
 					var yearFormat = d3.time.format("%Y");  // get year yyyy
 					var dayFormat = d3.time.format("%d");  // get day dd
-					if ((year == yearFormat(date)) && (month == monthNameFormat(date))) {
+					var monthIndex = monthNameFormat(date) * 10 / 10;
+					if ((year == yearFormat(date)) && (month == monthIndex)) {
 						var index = dayFormat(date) * 10 / 10;
 						defaultMontlyData[index].frequency = data[i].frequency;
 					}
 				}
+				console.log("mothly data is: ");
 				console.log(defaultMontlyData);
 				return defaultMontlyData;
 			};
@@ -192,13 +226,14 @@
 					var yearFormat = d3.time.format("%Y");  // get year yyyy
 					if ((year == yearFormat(date))) {
 						for (var j = 0; j < months.length; j++) {
-							console.log(monthNameFormat(date));
+							// console.log(monthNameFormat(date));
 							if (months[j] ==  monthNameFormat(date)) {
 								yearlyData[j].frequency += data[i].frequency;
 							}
 						}
 					}
 				}
+				console.log("yearly data is: "); 
 				console.log(yearlyData);
 				return yearlyData;
 			};
@@ -216,13 +251,13 @@
   	$.fn.dataParser = function(options) {
   		// Establish our default settings
         var settings = $.extend({
-        	url : null,
-            type : null
+        	url : null
         }, options);
 
        	return this.each(function()  {
        		var $this = $(this);
-       		var notes = [];
+       		var designIdeas = [];
+       		var observations = [];
 
        		// get list of notes from data	
 			var getListOfNotes = function(data, type) {
@@ -272,12 +307,17 @@
 			d3.json(settings.url, function(error, json) {
 			    if (error) return console.warn(error);
 				var data = json['data'];
-				notes = getListOfNotes(data,settings.type);
+				designIdeas = getListOfNotes(data, "DesignIdea");
+				observations = getListOfNotes(data, "FieldNote");
 				$this.trigger("dataReady");	
 			}); 
 
-			this.getData = function() {
-				return notes;
+			this.getDesignIdeas = function() {
+				return designIdeas;
+			};
+
+			this.getObservations = function() {
+				return observations;
 			};
 
        	}); // <--- this.each ends
@@ -344,5 +384,71 @@
 		        .attr("d", line);
 	  	})
   	}; // <---line chart ends
-
 })(jQuery);
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ real page loads from here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+$(document).ready(function() {
+  	var pageLoads = function() {
+  		// UI
+	    var $chart_container = $(".chart_container");
+	    var $li_idea = $("#li_idea");
+	    var $li_observation = $("#li_observation");
+
+	    // create loading overlay
+	    var createLoading = function() {
+			var $loadingDiv = $(document.createElement("div")).addClass("loading");
+			var $loadingIcon = $(document.createElement("i")).addClass("fa fa-spinner fa-spin fa-5x");
+			var $loadingP = $(document.createElement("h5")).text("Loading...");
+			$loadingDiv.append($loadingIcon);
+			$loadingDiv.append($loadingP);
+			return $loadingDiv;
+		};
+		var $loadingDiv = createLoading();
+		$loadingDiv.appendTo($chart_container);
+
+		var $this = $(this);
+		// get the data first
+		var datapaser = $this.dataParser({
+			url: "http://naturenet.herokuapp.com/api/notes"
+		});
+
+		var loadIdeaChart = function(e) {
+			$li_observation.removeClass("active");
+			$li_idea.addClass("active");
+			var data = e.data.arg;
+			$chart_container.empty();
+			$chart_container.nnbarchart({
+				data: data,
+				type: "DesignIdea"
+			});
+		};
+
+		var loadObservationChart = function(e) {
+			$li_idea.removeClass("active");
+			$li_observation.addClass("active");
+			var data = e.data.arg;
+			$chart_container.empty();
+			$chart_container.nnbarchart({
+				data: data,
+				type: "FieldNote"
+			});
+		};
+
+		datapaser.on("dataReady", function() {
+			$loadingDiv.remove();
+			var designIdeas = this.getDesignIdeas();
+			var observations = this.getObservations();
+			$li_idea.on("click", {arg : designIdeas}, loadIdeaChart);
+			$li_observation.on("click", {arg : observations}, loadObservationChart);
+			// by default display design idea chart
+			$chart_container.nnbarchart({
+				data: designIdeas,
+				type: "DesignIdea"
+			});
+		});
+  	};
+
+  	pageLoads();
+});

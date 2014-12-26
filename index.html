@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="./nnvis.css">
-<style>
-
-
-</style>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./nnvis.css">
+</head>
 <body>
   <nav class="navbar navbar-default">
     <div class="container-fluid">
@@ -23,38 +23,21 @@
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav">
-          <li class="active"><a href="#designIdea_chart">Design Idea<span class="sr-only">(current)</span></a></li>
-          <li><a href="#observation_chart">Observations</a></li>
+          <li id="li_idea" class="active"><a href="#">Design Idea</a></li>
+          <li id="li_observation"><a href="#">Observations</a></li>
         </ul>
       </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
   </nav>
 
   <div class="container">
-    <!-- <h2 class="text-center"> Design Ideas </h2> -->
-    <div id="designIdea_chart"></div>
-    <div id="observation_chart"></div>
-
-    <!-- <div id="note_chart"> </div> -->
+    <div class="chart_container text-center"></div>
   </div>
 
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./nnvis.js"></script>
-<script>
-  var $this = $(this);
-  // get the data first
-  var datapaser = $this.dataParser({
-    url: "http://naturenet-dev.herokuapp.com/api/notes",
-    type:  "DesignIdea"
-  });
-
-  datapaser.on("dataReady", function() {
-    var data = this.getData();
-    $("#designIdea_chart").nnbarchart({
-      data: data,
-      type: "DesignIdea"
-    });
-  });
-</script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="./d3-tip.js"></script>
+  <script type="text/javascript" src="./nnvis.js"></script>
+</body>
+</html>
