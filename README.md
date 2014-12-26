@@ -15,6 +15,7 @@ Step 1: Files to include
     <link rel="stylesheet" href="./nnvis.css">
     /* js */
     <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
     <script type="text/javascript" src="./nnvis.js"></script>
 ```
 Step 2: HTML markup structure
@@ -25,6 +26,7 @@ Step 3: Get data first, then display the data
 ```Javascript
     var $chart_container = $(".chart_container");
     // get data first, dataParser is the first jQuery plugin
+    // dataParser takes the url as an option
     var $this = $(this);
     var datapaser = $this.dataParser({
 						url: "http://naturenet.herokuapp.com/api/notes"
@@ -32,16 +34,17 @@ Step 3: Get data first, then display the data
 		
     // wait until dataparser is ready
     datapaser.on("dataReady", function() {
-    	//get data from designIdeas
+    	//get the data from designIdeas
 		var designIdeas = this.getDesignIdeas();
-		// get data from observations
+		// get the data from observations
 		var observations = this.getObservations();
-		// create chart of design ideas by calling "nnbarchart" plugin
+		// create a chart of design ideas by calling "nnbarchart" plugin
       	$chart_container.nnbarchart({
 			data: designIdeas,
 			type: "DesignIdea"
 		});
-		// similarily, create chart of observations by calling "nnbarchart" plugin
+		// or, similarily, create a chart of observations by calling "nnbarchart" plugin
+		// You can't apply nnbarchart plugin to a same DOM object
       	$chart_container.nnbarchart({
 		  	data: observations,
 		  	type: "FieldNote"

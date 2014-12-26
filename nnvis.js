@@ -1,7 +1,15 @@
 (function($) {
+
 	/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ nnbarchart plugin~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+	/**
+     * @example
+     * $('#element').nnbarchart({
+     *     data: 'this is the data will be displayed',
+     *     type: 'DesignIdeas, NoteFields'
+     * });
+     */
 	$.fn.nnbarchart = function(options) {
 
 		return this.each(function() {
@@ -148,7 +156,7 @@
 				    		return "<strong>Frequency:</strong> <span style='color:red'>" + d.frequency + "</span>";
 				  		});	
 				svg.call(tip);
-					
+
 			  	x.domain(data.map(function(d) { return d.date; }));
 			  	y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
 
@@ -180,9 +188,9 @@
 			      		else return i*50  })
 			      	// .duration(50)
 			      	.attr("y", function(d) { return y(d.frequency); })
-			      	.attr("height", function(d) { return height - y(d.frequency); })
-			      	.on("mouseover", tip.show)
-			      	.on("mouseout", tip.hide);
+			      	.attr("height", function(d) { return height - y(d.frequency); });
+			      	// .on("mouseover", tip.show)
+			      	// .on("mouseout", tip.hide);
 			};
 
 			// filter data by month (yyyy/mm)
@@ -248,6 +256,12 @@
 	/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ data parser ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+	/**
+	 * @example
+     * $('#element').dataParser({
+     *    url: 'NN data api url'
+     * });
+     */
   	$.fn.dataParser = function(options) {
   		// Establish our default settings
         var settings = $.extend({
@@ -324,6 +338,10 @@
         
   	}; // <--- dataPaser ends
 
+	/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ linechart plugin~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+	// not available now
   	$.fn.nnlinechart = function () {
   		var margin = {top: 20, right: 20, bottom: 30, left: 50},
 		    width = 960 - margin.left - margin.right,
@@ -386,69 +404,3 @@
   	}; // <---line chart ends
 })(jQuery);
 
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ real page loads from here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-$(document).ready(function() {
-  	var pageLoads = function() {
-  		// UI
-	    var $chart_container = $(".chart_container");
-	    var $li_idea = $("#li_idea");
-	    var $li_observation = $("#li_observation");
-
-	    // create loading overlay
-	    var createLoading = function() {
-			var $loadingDiv = $(document.createElement("div")).addClass("loading");
-			var $loadingIcon = $(document.createElement("i")).addClass("fa fa-spinner fa-spin fa-5x");
-			var $loadingP = $(document.createElement("h5")).text("Loading...");
-			$loadingDiv.append($loadingIcon);
-			$loadingDiv.append($loadingP);
-			return $loadingDiv;
-		};
-		var $loadingDiv = createLoading();
-		$loadingDiv.appendTo($chart_container);
-
-		var $this = $(this);
-		// get the data first
-		var datapaser = $this.dataParser({
-			url: "http://naturenet.herokuapp.com/api/notes"
-		});
-
-		var loadIdeaChart = function(e) {
-			$li_observation.removeClass("active");
-			$li_idea.addClass("active");
-			var data = e.data.arg;
-			$chart_container.empty();
-			$chart_container.nnbarchart({
-				data: data,
-				type: "DesignIdea"
-			});
-		};
-
-		var loadObservationChart = function(e) {
-			$li_idea.removeClass("active");
-			$li_observation.addClass("active");
-			var data = e.data.arg;
-			$chart_container.empty();
-			$chart_container.nnbarchart({
-				data: data,
-				type: "FieldNote"
-			});
-		};
-
-		datapaser.on("dataReady", function() {
-			$loadingDiv.remove();
-			var designIdeas = this.getDesignIdeas();
-			var observations = this.getObservations();
-			$li_idea.on("click", {arg : designIdeas}, loadIdeaChart);
-			$li_observation.on("click", {arg : observations}, loadObservationChart);
-			// by default display design idea chart
-			$chart_container.nnbarchart({
-				data: designIdeas,
-				type: "DesignIdea"
-			});
-		});
-  	};
-
-  	pageLoads();
-});

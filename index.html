@@ -39,5 +39,75 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="./d3-tip.js"></script>
   <script type="text/javascript" src="./nnvis.js"></script>
+  <script type="text/javascript">
+  /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ real page loads from here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+    $(document).ready(function() {
+        var pageLoads = function() {
+          // UI
+          var $chart_container = $(".chart_container");
+          var $li_idea = $("#li_idea");
+          var $li_observation = $("#li_observation");
+
+          // create loading overlay
+          var createLoading = function() {
+          var $loadingDiv = $(document.createElement("div")).addClass("loading");
+          var $loadingIcon = $(document.createElement("i")).addClass("fa fa-spinner fa-spin fa-5x");
+          var $loadingP = $(document.createElement("h5")).text("Loading...");
+          $loadingDiv.append($loadingIcon);
+          $loadingDiv.append($loadingP);
+          return $loadingDiv;
+        };
+        var $loadingDiv = createLoading();
+        $loadingDiv.appendTo($chart_container);
+
+        var $this = $(this);
+        // get the data first
+        var datapaser = $this.dataParser({
+          url: "http://naturenet.herokuapp.com/api/notes"
+        });
+
+        var loadIdeaChart = function(e) {
+          $li_observation.removeClass("active");
+          $li_idea.addClass("active");
+          var data = e.data.arg;
+          $chart_container.empty();
+          $chart_container.nnbarchart({
+            data: data,
+            type: "DesignIdea"
+          });
+        };
+
+        var loadObservationChart = function(e) {
+          $li_idea.removeClass("active");
+          $li_observation.addClass("active");
+          var data = e.data.arg;
+          $chart_container.empty();
+          $chart_container.nnbarchart({
+            data: data,
+            type: "FieldNote"
+          });
+        };
+
+        // when the data is received, dataParser fires a "dataReady" event
+        // manulipate the data (the callback function) after "dataReady"
+        datapaser.on("dataReady", function() {
+          $loadingDiv.remove();
+          var designIdeas = this.getDesignIdeas();
+          var observations = this.getObservations();
+          $li_idea.on("click", {arg : designIdeas}, loadIdeaChart);
+          $li_observation.on("click", {arg : observations}, loadObservationChart);
+          // by default display design idea chart
+          $chart_container.nnbarchart({
+            data: designIdeas,
+            type: "DesignIdea"
+          });
+        });
+        };
+
+        pageLoads();
+    });
+  </script>
 </body>
 </html>
