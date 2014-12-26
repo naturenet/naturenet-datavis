@@ -43,8 +43,10 @@ Step 3: Get data first, then display the data
 			data: designIdeas,
 			type: "DesignIdea"
 		});
-		// or, similarily, create a chart of observations by calling "nnbarchart" plugin
-		// You can't apply nnbarchart plugin to a same DOM object
+		// or, similarily, create a chart of observations by calling "nnbarchart" plugin.
+		// You can't apply nnbarchart plugin to a same DOM object twice,
+		// unless, the DOM object has removed the chart.
+		$chart_container.empty();
       	$chart_container.nnbarchart({
 		  	data: observations,
 		  	type: "FieldNote"
