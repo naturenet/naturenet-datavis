@@ -15,7 +15,7 @@
 		return this.each(function() {
 			var $chartContainer = $(this);
 			// UI elments
-			var $chartDiv, $ySelect, $mSelect, $header;
+			var $barChartDiv, $lineChartDiv, $ySelect, $mSelect, $header;
 
 			// d3 elements
 			var marign, height, width, x, y, xAxis, yAxis, svg;
@@ -76,8 +76,11 @@
 	        };
 
 	        var createChartDiv = function() {
-	        	$chartDiv = $(document.createElement("div")).addClass("chart");
-	        	$chartDiv.appendTo($chartContainer);
+	        	$barChartDiv = $(document.createElement("div")).addClass("barchart");
+	        	$lineChartDiv = $(document.createElement("div")).addClass("linechart");
+	        	$barChartDiv.appendTo($chartContainer);
+	        	$lineChartDiv.appendTo($chartContainer);
+
 	        };
 
 	        var setMargin = function() {
@@ -103,52 +106,27 @@
 				    .ticks(5);	
 	        };
 
-	        var setSVG = function() {
-	        	svg = d3.select(".chart").append("svg")
+	        var initSVG = function(element) {
+	        	svg = d3.select(element).append("svg")
 			    		.attr("width", width + margin.left + margin.right)
 			    		.attr("height", height + margin.top + margin.bottom)
 			  			.append("g")
 			    		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-	        };
-
-
-	        // everything starts from here
-	        var setupVis = function() {
-	        	createHeader();
-	        	createSelectDiv();
-	        	createChartDiv();
-	        	setMargin();
-	        	setXY();
-	        	setSVG();
-	        	initElement();
+			   	return svg;
 	        };
 
 	        /* register listeners to year and month selectors */
 	        var initElement = function() {
 	        	$header = $("h2", $chartContainer);
+	        	$lineChartDiv = $(".linechart", $chartContainer);
 	        	$ySelect = $(".year", $chartContainer);	        	
 	        	$mSelect = $(".month", $chartContainer);
 	        	$ySelect.on("change", generateSVG);
 	        	$mSelect.on("change", generateSVG);
 	        };
 
-	        // year/month select listener
-	        var generateSVG = function() {
-	        	var year = $ySelect.val();
-	        	var month = $mSelect.val();
-	        	console.log("year seleciton: " + year + " month: " + month);
-	        	var mData;
-	        	(month == 0) ? mData = getYearlyData(contributions, year) 
-	        				: mData = getMonthlyData(contributions, year, month);
-				d3.select("svg").remove();
-	        	setMargin();
-	        	setXY();
-	        	setSVG();
-			    renderSVG(mData);
-	        };
-
 			// generates the svg for the bar chart
-			var renderSVG = function(data) {	
+			var renderSVG = function(data, svg, type) {	
 				var tip = d3.tip()
 				  		.attr('class', 'd3-tip')
 				  		.offset([-10, 0])
@@ -175,22 +153,33 @@
 			      	.style("text-anchor", "end")
 			      	.text("Frequency");
 
-			  	svg.selectAll(".bar")
-			      	.data(data)
-			      	.enter().append("rect")
-			      	.attr("class", "bar")
-			      	.attr("data-toggle", "tooltip")
-			      	.attr("x", function(d) { return x(d.date); })
-			      	.attr("width", x.rangeBand())
-			      	.transition()
-			      	.delay(function (d, i) { 
-			      		if (d.frequency == 0) return 0 
-			      		else return i*50  })
-			      	// .duration(50)
-			      	.attr("y", function(d) { return y(d.frequency); })
-			      	.attr("height", function(d) { return height - y(d.frequency); });
-			      	// .on("mouseover", tip.show)
-			      	// .on("mouseout", tip.hide);
+			    if (type == "bar") {
+			    	svg.selectAll(".bar")
+			      		.data(data)
+			      		.enter().append("rect")
+			      		.attr("class", "bar")
+			      		.attr("data-toggle", "tooltip")
+			      		.attr("x", function(d) { return x(d.date); })
+			      		.attr("width", x.rangeBand())
+			      		.transition()
+			      		.delay(function (d, i) { 
+				      		if (d.frequency == 0) return 0 
+				      		else return i*50  })
+				      	// .duration(50)
+				      	.attr("y", function(d) { return y(d.frequency); })
+				      	.attr("height", function(d) { return height - y(d.frequency); });
+				      	// .on("mouseover", tip.show)
+				      	// .on("mouseout", tip.hide);
+			    } else if (type == "line") {
+			    	var line = d3.svg.line()
+							      .x(function(d) { return x(d.date); })
+							      .y(function(d) { return y(d.frequency); });
+			    	svg.append("path")
+			        .datum(data)
+			        .attr("class", "line")
+			        .attr("d", line);
+			    }
+
 			};
 
 			// filter data by month (yyyy/mm)
@@ -245,6 +234,36 @@
 				console.log(yearlyData);
 				return yearlyData;
 			};
+
+	        // every HTML element initialize from here
+	        var setupVis = function() {
+	        	createHeader();
+	        	createSelectDiv();
+	        	createChartDiv();
+	        };
+
+	        // year/month select listener
+	        var generateSVG = function() {
+	        	setMargin();
+	        	setXY();
+	        	initElement();
+	        	var year = $ySelect.val();
+	        	var month = $mSelect.val();
+	        	console.log("year seleciton: " + year + " month: " + month);
+	        	var mData;
+	        	(month == 0) ? mData = getYearlyData(contributions, year) 
+	        				: mData = getMonthlyData(contributions, year, month);
+				// d3.select("svg").remove();
+				$barChartDiv.empty();
+				$lineChartDiv.empty();
+	        	setMargin();
+	        	setXY();
+	        	var barsvg = initSVG(".barchart");
+	        	var linesvg = initSVG(".linechart");
+			    renderSVG(mData, barsvg, "bar");
+			    renderSVG(mData, linesvg, "line");
+	        };
+
 			// run setupVis by calling this method
 	        setupVis();
 	        generateSVG();
@@ -356,7 +375,10 @@
 
 		var xAxis = d3.svg.axis()
 		      .scale(lineX)
-		      .orient("bottom");
+		      .orient("bottom")
+			  .ticks(d3.time.days)
+		    // .tickSize(16, 0)
+		    .tickFormat(d3.time.format("%d"));
 
 		var yAxis = d3.svg.axis()
 		      .scale(lineY)
@@ -366,7 +388,7 @@
 		      .x(function(d) { return lineX(d.date); })
 		      .y(function(d) { return lineY(d.close); });
 
-		var svg = d3.select("#note_chart").append("svg")
+		var svg = d3.select("#linechart").append("svg")
 		      .attr("width", width + margin.left + margin.right)
 		      .attr("height", height + margin.top + margin.bottom)
 		    .append("g")
@@ -400,7 +422,7 @@
 		        .datum(data)
 		        .attr("class", "line")
 		        .attr("d", line);
-	  	})
+	  	});
   	}; // <---line chart ends
 })(jQuery);
 
