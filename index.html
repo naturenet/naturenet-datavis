@@ -62,11 +62,18 @@
 
         var $loadingDiv = createLoading();
         $loadingDiv.appendTo($chart_container);
-
-        var $this = $(this);
+        var element = this;
+        var $this = $(element);
         // get the data first
         var datapaser = $this.dataParser({
           url: "http://naturenet.herokuapp.com/api/notes"
+        });
+
+        $.ajax({
+          type: "GET",
+          url: "http://naturenet.herokuapp.com/api/stats/designideas",
+          
+          success: function(data) {console.log(data)}
         });
 
         var loadIdeaChart = function(e) {
