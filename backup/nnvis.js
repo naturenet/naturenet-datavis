@@ -5,45 +5,40 @@
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 	/**
      * @example
-     * $('#element').barchart({
-     *     url: 'data api link url',
-     *     type: 'DesignIdeas, NoteFields, Comments, etc..'
+     * $('#element').nnbarchart({
+     *     data: 'this is the data will be displayed',
+     *     type: 'DesignIdeas, NoteFields'
      * });
      */
-	$.fn.nnchart = function(options) {
+	$.fn.nnbarchart = function(options) {
 
 		return this.each(function() {
 			var $chartContainer = $(this);
 			// UI elments
-			var $barChartDiv, $lineChartDiv, $loadingDiv, $ySelect, $mSelect, $header;
+			var $barChartDiv, $lineChartDiv, $ySelect, $mSelect, $header;
 
 			// d3 elements
 			var marign, height, width, x, y, xAxis, yAxis, svg;
 
 			// Establish our default settings
-	        var defaultOptions = $.extend({
-	        	url : null,
+	        var typeOption = $.extend({
+	        	data : null,
 	            type : null
 	        }, options);
 
 	        // data
 			// converted JSON follows {"date": mm/dd/yy , "frequency" : nn}
-			var contributions;
+			var contributions = typeOption.data;
+
 	        /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 			~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ setup UI & chart ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	       	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 	       	var createHeader = function() {
 	       		$header = $(document.createElement("h2")).addClass("text-center");
-	       		if (defaultOptions.type == "DesignIdea") {
+	       		if (typeOption.type == "DesignIdea") {
 	       			$header.html("Design Ideas");
-	       		} else if (defaultOptions.type == "FieldNote") {
+	       		} else if (typeOption.type == "FieldNote") {
 	       			$header.html("Observations");
-	       		} else if (defaultOptions.type == "Users") {
-	       			$header.html("Users");
-	       		} else if (defaultOptions.type == "Comments") {
-	       			$header.html("Comments");
-	       		} else if (defaultOptions.type == "Likes") {
-	       			$header.html("Likes");
 	       		}
 
 	       		$header.appendTo($chartContainer);
@@ -85,24 +80,8 @@
 	        	$lineChartDiv = $(document.createElement("div")).addClass("linechart");
 	        	$barChartDiv.appendTo($chartContainer);
 	        	$lineChartDiv.appendTo($chartContainer);
+
 	        };
-
-	        // create loading overlay
-          	var createLoading = function() {
-          		$loadingDiv = $(document.createElement("div")).addClass("loading");
-          		var $loadingIcon = $(document.createElement("i")).addClass("fa fa-spinner fa-spin fa-5x");
-          		var $loadingP = $(document.createElement("h5")).text("Loading...");
-          		$loadingDiv.append($loadingIcon);
-          		$loadingDiv.append($loadingP);
-          		$loadingDiv.appendTo($chartContainer);
-        	};
-
-        	// remove loading div
-        	var removeLoading = function() {
-        		if ($loadingDiv != null) {
-	              	$loadingDiv.remove();
-	            }
-        	};
 
 	        var setMargin = function() {
 				margin = {top: 20, right: 20, bottom: 30, left: 40},
@@ -148,6 +127,14 @@
 
 			// generates the svg for the bar chart
 			var renderSVG = function(data, svg, type) {	
+				var tip = d3.tip()
+				  		.attr('class', 'd3-tip')
+				  		.offset([-10, 0])
+				  		.html(function(d) {
+				    		return "<strong>Frequency:</strong> <span style='color:red'>" + d.frequency + "</span>";
+				  		});	
+				svg.call(tip);
+
 			  	x.domain(data.map(function(d) { return d.date; }));
 			  	y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
 
@@ -180,8 +167,7 @@
 				      		else return i*50  })
 				      	// .duration(50)
 				      	.attr("y", function(d) { return y(d.frequency); })
-				      	.attr("height", function(d) { return height - y(d.frequency); })
-				      	.text(function(d) { return d.frequency; });
+				      	.attr("height", function(d) { return height - y(d.frequency); });
 				      	// .on("mouseover", tip.show)
 				      	// .on("mouseout", tip.hide);
 			    } else if (type == "line") {
@@ -216,8 +202,8 @@
 						defaultMontlyData[index].frequency = data[i].frequency;
 					}
 				}
-				// console.log("mothly data is: ");
-				// console.log(defaultMontlyData);
+				console.log("mothly data is: ");
+				console.log(defaultMontlyData);
 				return defaultMontlyData;
 			};
 
@@ -230,6 +216,7 @@
       				var monthlyDataDefault = {"date": months[i] ,"frequency" : 0 };
 					yearlyData.push(monthlyDataDefault);
       			}
+
       			for (var i in data) {
 					var date = new Date(data[i].date);
 					var monthNameFormat = d3.time.format("%b"); // get month mm
@@ -238,14 +225,13 @@
 						for (var j = 0; j < months.length; j++) {
 							// console.log(monthNameFormat(date));
 							if (months[j] ==  monthNameFormat(date)) {
-								// adding paserInt is to enfore the frequecy is a number
-								yearlyData[j].frequency += parseInt(data[i].frequency);
+								yearlyData[j].frequency += data[i].frequency;
 							}
 						}
 					}
 				}
-				// console.log("yearly data is: "); 
-				// console.log(yearlyData);
+				console.log("yearly data is: "); 
+				console.log(yearlyData);
 				return yearlyData;
 			};
 
@@ -254,7 +240,6 @@
 	        	createHeader();
 	        	createSelectDiv();
 	        	createChartDiv();
-	        	createLoading();
 	        };
 
 	        // year/month select listener
@@ -264,7 +249,7 @@
 	        	initElement();
 	        	var year = $ySelect.val();
 	        	var month = $mSelect.val();
-	        	// console.log("year seleciton: " + year + " month: " + month);
+	        	console.log("year seleciton: " + year + " month: " + month);
 	        	var mData;
 	        	(month == 0) ? mData = getYearlyData(contributions, year) 
 	        				: mData = getMonthlyData(contributions, year, month);
@@ -279,32 +264,103 @@
 			    renderSVG(mData, linesvg, "line");
 	        };
 
-	        // show data to the chart
-	        var showChartByData = function() {
-	        	var url = defaultOptions.url;
-	        	setupVis();
-	          	d3.tsv(url, toNumber, function(error, data) {
-	            	removeLoading();
-	            	contributions = data;
-	            	generateSVG();
-	          	});
-
-		        var toNumber = function (d) {
-		        	d.value = +d.value; // coerce to number
-		            return d;
-		        }
-		    };
-
-			showChartByData();
-
+			// run setupVis by calling this method
+	        setupVis();
+	        generateSVG();
 		});  // <--- this.each() return function ends
 			
-  	};  // <--- nnchart ends
+  	};  // <--- nnbarchart ends
 
-	// !!!!  not available now !!!!!
+
+	/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ data parser ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+	/**
+	 * @example
+     * $('#element').dataParser({
+     *    url: 'NN data api url'
+     * });
+     */
+  	$.fn.dataParser = function(options) {
+  		// Establish our default settings
+        var settings = $.extend({
+        	url : null
+        }, options);
+
+       	return this.each(function()  {
+       		var $this = $(this);
+       		var designIdeas = [];
+       		var observations = [];
+
+       		// get list of notes from data	
+			var getListOfNotes = function(data, type) {
+			    var times = [];
+			    for (var i in data) {
+			      	if (data[i]['kind'] == type) {
+			        	times.push(data[i]['modified_at']);
+			      	}
+			    }
+			    times.sort(function (a, b) {
+			      	return a-b;
+			    });
+
+			    var convertedTimes = [];
+			    for (var j = 0; j < times.length; j++) {
+			      convertedTimes.push(convertDate(times[j])); 
+			      // console.log(times[j] + "--" + convertedTimes[j]);
+			    }
+			    var lastSame = 0;
+			    var contributions = [];
+			    for (var m = lastSame+1; m < convertedTimes.length; m++) {
+			      if (convertedTimes[m] != convertedTimes[m-1]) {
+			          var contribution = {"date" : convertedTimes[m-1] , "frequency" : m - lastSame};
+			          contributions.push(contribution);
+			          lastSame = m; 
+			      }
+			    }
+			    console.log(contributions);
+			    return contributions;
+			};
+
+			// convert epoch time to mm/dd/yy
+			var convertDate = function(date) {
+			  var cDate = new Date(date);
+			  var format = d3.time.format("%m/%d/%y");
+			  return format(cDate);
+			};
+
+			// convert epoch time to mm dd
+			var mmddDate = function(date) {
+			  var cDate = new Date(date);
+			  var format = d3.time.format("%b %d");
+			  return format(cDate);
+			};
+
+			// parse json and render svg starts here
+			d3.json(settings.url, function(error, json) {
+			    if (error) return console.warn(error);
+				var data = json['data'];
+				designIdeas = getListOfNotes(data, "DesignIdea");
+				observations = getListOfNotes(data, "FieldNote");
+				$this.trigger("dataReady");	
+			}); 
+
+			this.getDesignIdeas = function() {
+				return designIdeas;
+			};
+
+			this.getObservations = function() {
+				return observations;
+			};
+
+       	}); // <--- this.each ends
+        
+  	}; // <--- dataPaser ends
+
 	/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ linechart plugin~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+	// not available now
   	$.fn.nnlinechart = function () {
   		var margin = {top: 20, right: 20, bottom: 30, left: 50},
 		    width = 960 - margin.left - margin.right,
