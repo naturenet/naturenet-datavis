@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./nnvis.css">
+</head>
+<body>
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">NatureNet Data</a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li id="li_ideas" class="active"><a href="#">Design Ideas</a></li>
+          <li id="li_observations"><a href="#">Observations</a></li>
+          <li id="li_users"><a href="#">Users</a></li>
+          <li id="li_comments"><a href="#">Comments</a></li>
+          <li id="li_likes"><a href="#">Likes</a></li>
+
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
+
+  <div class="container">
+    <div class="chart_container text-center"></div>
+  </div>
+
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="./nnvis.js"></script>
+  <script type="text/javascript">
+  /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ real page loads from here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+    $(document).ready(function() {
+        var pageLoads = function() {
+          // UI
+          var $chart_container = $(".chart_container");
+          var $li_ideas = $("#li_ideas");
+          var $li_observations = $("#li_observations");
+          var $li_users = $("#li_users");
+          var $li_comments = $("#li_comments");
+          var $li_likes = $("#li_likes");
+          var $ul_bar = $(".nav.navbar-nav");
+
+          // reset UI
+          var resetUI = function($this) {
+            $this.addClass("active");
+            var $other = $(".nav.navbar-nav li");
+            $other.not($this).removeClass("active");
+            $chart_container.empty();
+          }
+
+          var loadIdeaChart = function(e) {
+            resetUI($(this));
+            $chart_container.nnchart({
+              url: "http://naturenet.herokuapp.com/api/stats/designideas",
+              type: "DesignIdea"
+            });
+          };
+
+          var loadObservationChart = function(e) {
+            resetUI($(this));
+            $chart_container.nnchart({
+              url: "http://naturenet.herokuapp.com/api/stats/observations",
+              type: "FieldNote"
+            });
+          };
+
+          var loadUsersChart = function(e) {
+            resetUI($(this));
+            $chart_container.nnchart({
+              url: "http://naturenet.herokuapp.com/api/stats/users",
+              type: "Users"
+            });
+          };
+
+          var loadCommentsChart = function(e) {
+            resetUI($(this));
+            $chart_container.nnchart({
+              url: "http://naturenet.herokuapp.com/api/stats/comments",
+              type: "Comments"
+            });
+          };
+
+          var loadLikesChart = function(e) {
+            resetUI($(this));
+            $chart_container.nnchart({
+              url: "http://naturenet.herokuapp.com/api/stats/likes",
+              type: "Likes"
+            });
+          };
+
+          // register click event to each li
+          $li_ideas.on("click", loadIdeaChart);
+          $li_observations.on("click",  loadObservationChart);
+          $li_comments.on("click",  loadCommentsChart);
+          $li_users.on("click",  loadUsersChart);
+          $li_likes.on("click",  loadLikesChart);
+
+          // by default, chart loads data from design ideas
+          var $chart_container = $(".chart_container");
+          $chart_container.nnchart({
+            url: "http://naturenet.herokuapp.com/api/stats/designideas",
+            type: "DesignIdea"
+          });
+        };
+
+        pageLoads();
+      // $("#linechart").nnlinechart();
+    });
+  </script>
+</body>
+</html>
