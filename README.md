@@ -5,25 +5,25 @@ NatureNet data visualization
 
 nnvis.js contains two jQuery plugins. First, "dataParser"(deprecated) is used to parse data from NN APIs. Second, "nnchart" is used to draw a bar chart.
 
-A demo of how to use nnvis.js can be found here: http://webpages.uncc.edu/~jxia3/nnvis/. The demo uses fontawesome and Bootstrap for the UI.
+A demo of how to use nnvis.js can be found here: http://webpages.uncc.edu/jxia3/nnvis/ or "./index.html". The demo uses Fontawesome and Bootstrap for the UI.
 
 Here is how to use the nnvis.js:
 
 Step 1: Make sure those files are included in your page
 ```HTML
-    /* css for the chart only */
+    <!--  css for the chart only -->
     <link rel="stylesheet" href="./nnvis.css">
-    /* JavaScript dependencies */
+    <!--  JavaScript dependencies -->
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
-    /* nnvis.js */
+    <!--  nnvis.js -->
     <script type="text/javascript" src="./nnvis.js"></script>
 ```
 Step 2: HTML markup structure, create a container for the chart
 ```HTML
     <div class="chart_container text-center"></div>
 ```    
-Step 3: Get data first, then display the data 
+Step 3: Plug the plugin into a DOM element
 ```Javascript
     var $chart_container = $(".chart_container");
     // plug nnchart into this DOM element

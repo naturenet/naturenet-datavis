@@ -182,8 +182,6 @@
 				      	.attr("y", function(d) { return y(d.frequency); })
 				      	.attr("height", function(d) { return height - y(d.frequency); })
 				      	.text(function(d) { return d.frequency; });
-				      	// .on("mouseover", tip.show)
-				      	// .on("mouseout", tip.hide);
 			    } else if (type == "line") {
 			    	var line = d3.svg.line()
 							      .x(function(d) { return x(d.date); })
@@ -213,7 +211,8 @@
 					var monthIndex = monthNameFormat(date) * 10 / 10;
 					if ((year == yearFormat(date)) && (month == monthIndex)) {
 						var index = dayFormat(date) * 10 / 10;
-						defaultMontlyData[index].frequency = data[i].frequency;
+						// adding paserInt is to force the frequecy is a number
+						defaultMontlyData[index].frequency = parseInt(data[i].frequency);
 					}
 				}
 				// console.log("mothly data is: ");
@@ -238,7 +237,7 @@
 						for (var j = 0; j < months.length; j++) {
 							// console.log(monthNameFormat(date));
 							if (months[j] ==  monthNameFormat(date)) {
-								// adding paserInt is to enfore the frequecy is a number
+								// adding paserInt is to force the frequecy is a number
 								yearlyData[j].frequency += parseInt(data[i].frequency);
 							}
 						}
