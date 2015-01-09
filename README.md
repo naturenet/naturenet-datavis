@@ -11,11 +11,16 @@ Here is how to use the nnvis.js:
 
 Step 1: Make sure those files are included in your page
 ```HTML
-    <!--  css for the chart only -->
+    <!--  css for Fontawesome and Bootstrap -->
+  	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+  	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">	
+    <!--  css for the chart only. Important!-->
     <link rel="stylesheet" href="./nnvis.css">
     <!--  JavaScript dependencies -->
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <!--  Bootstrap -->
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     <!--  nnvis.js -->
     <script type="text/javascript" src="./nnvis.js"></script>
 ```
@@ -32,7 +37,7 @@ Step 3: Plug the plugin into a DOM element
 		type: "DesignIdea"
 	});
 	// Or, similarily, create a chart of observations by calling "nnchart" plugin.
-	// However, you can't apply nnbarchart plugin to a same DOM object twice,
+	// However, you can't apply nnchart plugin to a same DOM object twice,
 	// unless, the DOM object has removed the chart.
 	$chart_container.empty();
   	$chart_container.nnchart({
