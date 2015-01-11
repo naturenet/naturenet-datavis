@@ -300,6 +300,93 @@
 			
   	};  // <--- nnchart ends
 
+  	/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ data parser ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+	/** 
+	 * @Deprecated
+	 * @example
+     * $('#element').dataParser({
+     *    url: 'NN data api url'
+     * });
+     * @return Observations/DesignIdeas
+     */
+  	$.fn.dataParser = function(options) {
+  		// Establish our default settings
+        var settings = $.extend({
+        	url : null
+        }, options);
+
+       	return this.each(function()  {
+       		var $this = $(this);
+       		var designIdeas = [];
+       		var observations = [];
+
+       		// get list of notes from data	
+			var getListOfNotes = function(data, type) {
+			    var times = [];
+			    for (var i in data) {
+			      	if (data[i]['kind'] == type) {
+			        	times.push(data[i]['modified_at']);
+			      	}
+			    }
+			    times.sort(function (a, b) {
+			      	return a-b;
+			    });
+
+			    var convertedTimes = [];
+			    for (var j = 0; j < times.length; j++) {
+			      convertedTimes.push(convertDate(times[j])); 
+			      // console.log(times[j] + "--" + convertedTimes[j]);
+			    }
+			    var lastSame = 0;
+			    var contributions = [];
+			    for (var m = lastSame+1; m < convertedTimes.length; m++) {
+			      if (convertedTimes[m] != convertedTimes[m-1]) {
+			          var contribution = {"date" : convertedTimes[m-1] , "frequency" : m - lastSame};
+			          contributions.push(contribution);
+			          lastSame = m; 
+			      }
+			    }
+			    console.log(contributions);
+			    return contributions;
+			};
+
+			// convert epoch time to mm/dd/yy
+			var convertDate = function(date) {
+			  var cDate = new Date(date);
+			  var format = d3.time.format("%m/%d/%y");
+			  return format(cDate);
+			};
+
+			// convert epoch time to mm dd
+			var mmddDate = function(date) {
+			  var cDate = new Date(date);
+			  var format = d3.time.format("%b %d");
+			  return format(cDate);
+			};
+
+			// parse json and render svg starts here
+			d3.json(settings.url, function(error, json) {
+			    if (error) return console.warn(error);
+				var data = json['data'];
+				designIdeas = getListOfNotes(data, "DesignIdea");
+				observations = getListOfNotes(data, "FieldNote");
+				$this.trigger("dataReady");	
+			}); 
+
+			this.getDesignIdeas = function() {
+				return designIdeas;
+			};
+
+			this.getObservations = function() {
+				return observations;
+			};
+
+       	}); // <--- this.each ends
+        
+  	}; // <--- dataPaser ends
+
 	// !!!!  not available now !!!!!
 	/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ linechart plugin~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
